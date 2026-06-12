@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktiv Galereya</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* --- ATRIBUT ORQALI TUNGI REJIM (O'quvchilar tushunishi uchun) --- */
+        body[data-theme="dark"] {
+            background-color: #1e272e;
+            color: #ffffff;
+        }
+
+        body[data-theme="dark"] .gallery-wrapper {
+            background: #2d3748;
+        }
+
+        .gallery-wrapper {
+            text-align: center;
+            max-width: 650px;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transition: background 0.3s;
+        }
+
+        .main-image-box img {
+            width: 100%;
+            height: 380px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 4px solid #fff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .photos {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .photos img {
+            width: 100px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 6px;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: 0.3s;
+            border: 2px solid transparent;
+        }
+
+        /* Tanlangan kichik rasm */
+        .photos img.active, .photos img:hover {
+            opacity: 1;
+            border-color: #3498db;
+            transform: scale(1.05);
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        #toggle-dark-btn { background-color: #34495e; color: white; }
+        #clear-desc-btn { background-color: #e74c3c; color: white; }
+        button:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+
+    <div class="gallery-wrapper">
+        <h1 id="main-title">Ajoyib Tabiat Galereyasi</h1>
+        <p id="description">Kichik rasmlardan birini tanlang...</p>
+
+        <div class="main-image-box">
+            <img id="featured-img" src="https://picsum.photos/id/10/600/400" alt="Asosiy rasm" data-info="Chiroyli tog' manzarasi va sokin tabiat.">
+        </div>
+
+        <div class="photos">
+            <img class="photo active" src="https://picsum.photos/id/10/150/100" data-full="https://picsum.photos/id/10/600/400" data-text="Chiroyli tog' manzarasi va sokin tabiat.">
+            <img class="photo" src="https://picsum.photos/id/28/150/100" data-full="https://picsum.photos/id/28/600/400" data-text="O'rmon bo'ylab ketgan sirli va go'zal so'qmoq yo'l.">
+            <img class="photo" src="https://picsum.photos/id/54/150/100" data-full="https://picsum.photos/id/54/600/400" data-text="Kuz faslidagi oltin rangga burkangan daraxtlar.">
+        </div>
+
+        <div class="controls">
+            <button id="toggle-dark-btn">🌙 Tungi rejim</button>
+            <button id="clear-desc-btn">Matnni o'chirish</button>
+        </div>
+    </div>
+
+    <script>
+        // 1. Kerakli elementlarni tanlab olamiz
+        const mainImg = document.getElementById('featured-img');
+        const mainTitle = document.getElementById('main-title');
+        const description = document.getElementById('description');
+        const photos = document.querySelectorAll('.photo'); 
+
+        const darkBtn = document.getElementById('toggle-dark-btn');
+        const clearBtn = document.getElementById('clear-desc-btn');
+
+        // --- FOREACH va ADDEVENTLISTENER, GET/SET ATRIBUTLAR ---
+        photos.forEach(function(photo) {
+            photo.addEventListener('click', function() {
+                
+                // a) getAttribute orqali ma'lumotlarni o'qiymiz
+                const bigImgUrl = photo.getAttribute('data-full');
+                const imgText = photo.getAttribute('data-text');
+
+                // b) setAttribute orqali katta rasm va uning maxfiy ma'lumotini yangilaymiz
+                mainImg.setAttribute('src', bigImgUrl);
+                mainImg.setAttribute('data-info', imgText);
+
+                // c) textContent yordamida izohni o'zgartiramiz
+                description.textContent = imgText;
+
+                // d) Aktiv klassni yangilash (forEach yordamida)
+                photos.forEach(t => t.classList.remove('active'));
+                photo.classList.add('active');
+            });
+        });
+
+        // --- INNERHTML va REMOVEATTRIBUTE ---
+        clearBtn.addEventListener('click', function() {
+            // innerHTML yordamida HTML teglari bilan yozamiz
+            description.innerHTML = "<i>Matn o'chirib tashlandi!</i>";
+            
+            // removeAttribute yordamida rasmdagi maxfiy atributni o'chiramiz
+            mainImg.removeAttribute('data-info');
+        });
+
+        // --- TUNGI REJIM (GET, SET VA REMOVE ATRIBUTLAR BILAN) ---
+        darkBtn.addEventListener('click', function() {
+            // Body elementida 'data-theme' atributini tekshiramiz
+            const currentTheme = document.body.getAttribute('data-theme');
+
+            if (currentTheme === 'dark') {
+                // Atributni o'chiramiz (kunduzgi rejim)
+                document.body.removeAttribute('data-theme');
+                darkBtn.textContent = "🌙 Tungi rejim";
+            } else {
+                // Atributni qo'shamiz (tungi rejim)
+                document.body.setAttribute('data-theme', 'dark');
+                darkBtn.textContent = "☀️ Kunduzgi rejim";
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Kundalik</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .app-container {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            width: 500px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-top: 0;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            outline: none;
+        }
+
+        select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #27ae60;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            background: #f9f9f9;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 5px solid #3498db;
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+
+        .delete-btn:hover {
+            background: #c0392b;
+        }
+
+        .clear-all {
+            width: 100%;
+            background: #95a5a6;
+            margin-top: 10px;
+        }
+
+        .clear-all:hover {
+            background: #7f8c8d;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-container">
+        <h2>🚀 Smart Kundalik</h2>
+
+        <div class="input-group">
+            <input type="text" id="taskInput" placeholder="Bugungi rejangiz...">
+            <select id="moodSelect">
+                <option value="😊">😊 Quvnoq</option>
+                <option value="😐">😐 Oddiy</option>
+                <option value="🔥">🔥 Motivatsiyalangan</option>
+                <option value="😴">😴 Charchagan</option>
+            </select>
+            <button id="addBtn">Qo'shish</button>
+        </div>
+
+        <ul id="taskList"></ul>
+        <button id="clearAllBtn" class="clear-all">Hammasini o'chirish</button>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a0f">
+<title>RAQAM — Son Topish O'yini</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Courier New',monospace;background:#0a0a0f;color:#e8e0ff;min-height:100vh;overflow-x:hidden}
+#bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.screen{position:relative;z-index:1;display:none;padding:2rem 1.5rem}
+.screen.active{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh}
+.logo{font-size:2.8rem;font-weight:700;letter-spacing:-2px;color:#c084fc;text-shadow:0 0 40px rgba(192,132,252,0.4);margin-bottom:.3rem;font-family:Georgia,serif}
+.tagline{color:#7c6fa0;font-size:.85rem;letter-spacing:3px;text-transform:uppercase;margin-bottom:2.5rem}
+.card{background:#13111f;border:1px solid #2d2640;border-radius:16px;padding:2rem;width:100%;max-width:420px}
+.input-label{font-size:.75rem;color:#7c6fa0;letter-spacing:2px;text-transform:uppercase;margin-bottom:.5rem;display:block}
+input[type=text],input[type=number]{width:100%;background:#0d0b17;border:1px solid #2d2640;border-radius:10px;padding:.85rem 1rem;font-size:max(16px,1.1rem);color:#e8e0ff;font-family:'Courier New',monospace;outline:none;transition:border-color .2s;margin-bottom:1rem;-webkit-appearance:none;appearance:none}
+input:focus{border-color:#c084fc}
+.btn{width:100%;padding:1rem;border-radius:12px;border:none;font-size:1rem;font-family:'Courier New',monospace;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .15s;min-height:52px;touch-action:manipulation}
+.btn-primary{background:#c084fc;color:#0a0a0f}
+.btn-primary:hover,.btn-primary:active{background:#d8a8ff;transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-secondary{background:transparent;color:#c084fc;border:1px solid #c084fc;margin-top:.75rem}
+.btn-secondary:hover,.btn-secondary:active{background:#1a1530}
+.btn-danger{background:transparent;color:#f472b6;border:1px solid #f472b6;margin-top:.75rem}
+.btn-danger:hover,.btn-danger:active{background:#1a0f1a}
+
+/* ===== MODE SELECT SCREEN ===== */
+#mode-screen.active{padding:2rem 1.5rem}
+.mode-wrapper{width:100%;max-width:480px;display:flex;flex-direction:column;align-items:center}
+.mode-cards{display:grid;grid-template-columns:1fr 1fr;gap:1rem;width:100%;margin-bottom:1.5rem}
+.mode-card{background:#13111f;border:2px solid #2d2640;border-radius:20px;padding:2rem 1.25rem;text-align:center;cursor:pointer;transition:all .2s;touch-action:manipulation;display:flex;flex-direction:column;align-items:center;gap:.75rem}
+.mode-card:hover,.mode-card:active{border-color:#c084fc;background:#1a1530;transform:translateY(-3px)}
+.mode-icon{font-size:2.8rem;line-height:1}
+.mode-title{font-size:1.1rem;font-weight:700;color:#e8e0ff;letter-spacing:1px}
+.mode-desc{font-size:.75rem;color:#7c6fa0;line-height:1.5}
+.mode-badge{font-size:.65rem;background:rgba(192,132,252,.15);border:1px solid rgba(192,132,252,.3);color:#c084fc;padding:3px 10px;border-radius:20px;letter-spacing:1px}
+
+/* ===== SOLO SCREEN ===== */
+#solo-screen.active{justify-content:flex-start;padding:.75rem}
+.solo-header{width:100%;max-width:580px;display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.25rem;background:#13111f;border-radius:12px;border:1px solid #2d2640;margin-bottom:.75rem}
+.solo-stats{display:flex;gap:1.5rem;align-items:center}
+.solo-stat{text-align:center}
+.solo-stat-val{font-size:1.3rem;font-weight:700;color:#c084fc}
+.solo-stat-lbl{font-size:.65rem;color:#4a3f6b;letter-spacing:2px;text-transform:uppercase}
+.solo-area{width:100%;max-width:580px;display:flex;flex-direction:column;gap:.75rem}
+.solo-input-card{background:#13111f;border:1px solid #2d2640;border-radius:16px;padding:1.5rem}
+.range-badge{display:inline-block;background:#0d0b17;border:1px solid #2d2640;border-radius:8px;padding:.4rem 1rem;font-size:.9rem;font-weight:700;color:#c084fc;margin-bottom:1rem}
+.solo-hint-box{margin-top:1rem;padding:1rem;background:#0d0b17;border-radius:10px;border:1px solid #2d2640;min-height:54px;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+.solo-hint-text{font-size:.95rem;color:#7c6fa0}
+.hint-tag{font-size:.75rem;padding:5px 14px;border-radius:20px;letter-spacing:1px;font-weight:700}
+.hint-higher{background:#052e16;color:#4ade80;border:1px solid #166534}
+.hint-lower{background:#3b0764;color:#e879f9;border:1px solid #7e22ce}
+.hint-hot{background:#7c2d12;color:#fdba74;border:1px solid #c2410c}
+.hint-warm{background:#1a1206;color:#fbbf24;border:1px solid #92400e}
+.hint-warm2{background:#0c1f0c;color:#86efac;border:1px solid #166534}
+.hint-cold{background:#0f1729;color:#93c5fd;border:1px solid #1d4ed8}
+.solo-history-card{background:#13111f;border:1px solid #2d2640;border-radius:16px;padding:1.25rem;overflow-y:auto;max-height:220px;-webkit-overflow-scrolling:touch}
+.history-title{font-size:.7rem;color:#4a3f6b;letter-spacing:2px;text-transform:uppercase;margin-bottom:1rem}
+.history-item{display:flex;align-items:center;justify-content:space-between;padding:.55rem .75rem;border-radius:8px;margin-bottom:.35rem;font-size:.85rem;background:#0d0b17}
+.history-num{font-weight:700;font-size:1.1rem;color:#c084fc}
+.history-meta{font-size:.75rem;color:#4a3f6b}
+.res-higher{color:#4ade80}.res-lower{color:#f472b6}.res-found{color:#fbbf24;font-weight:700}
+
+/* ===== SOLO WIN SCREEN ===== */
+#solo-win-screen.active{justify-content:center}
+.win-screen{text-align:center;padding:1.5rem;max-width:420px;width:100%}
+.win-emoji{font-size:4rem;margin-bottom:1rem}
+.win-title{font-size:2rem;font-weight:700;color:#c084fc;margin-bottom:.5rem}
+.win-sub{color:#7c6fa0;font-size:.95rem;margin-bottom:1.5rem;line-height:1.6}
+.win-stats-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem;margin-bottom:1.5rem;width:100%}
+.win-stat-card{background:#13111f;border:1px solid #2d2640;border-radius:12px;padding:1rem .75rem;text-align:center}
+.win-stat-val{font-size:1.6rem;font-weight:700;color:#c084fc}
+.win-stat-lbl{font-size:.65rem;color:#4a3f6b;letter-spacing:1px;text-transform:uppercase;margin-top:3px}
+.win-best{color:#4ade80}
+.win-buttons{display:flex;flex-direction:column;gap:.6rem;width:100%}
+
+/* ===== MULTIPLAYER (same as original) ===== */
+.divider{display:flex;align-items:center;gap:1rem;margin:1.2rem 0}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:#2d2640}
+.divider span{color:#4a3f6b;font-size:.75rem}
+#lobby-screen.active{padding:1.5rem 1rem}
+.lobby-wrapper{width:100%;max-width:580px;display:flex;flex-direction:column;gap:1rem}
+.lobby-code-card{background:#13111f;border:1px solid #2d2640;border-radius:20px;padding:1.5rem 2rem;text-align:center}
+.lobby-code-label{font-size:.7rem;color:#4a3f6b;letter-spacing:3px;text-transform:uppercase;margin-bottom:.75rem}
+.room-code{font-size:3rem;font-weight:700;letter-spacing:8px;color:#c084fc;text-shadow:0 0 30px rgba(192,132,252,.35);display:block;margin:.25rem 0 .75rem;cursor:pointer;touch-action:manipulation;user-select:all}
+.share-btn{display:inline-flex;align-items:center;gap:.5rem;background:rgba(192,132,252,.1);border:1px solid rgba(192,132,252,.25);border-radius:30px;color:#c084fc;font-size:.8rem;font-family:'Courier New',monospace;font-weight:700;letter-spacing:1px;padding:.5rem 1.25rem;cursor:pointer;touch-action:manipulation;transition:all .15s}
+.share-btn:active{background:rgba(192,132,252,.2);transform:scale(.97)}
+.lobby-players-card{background:#13111f;border:1px solid #2d2640;border-radius:20px;padding:1.25rem 1.5rem}
+.lobby-players-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.lobby-players-title{font-size:.7rem;color:#4a3f6b;letter-spacing:3px;text-transform:uppercase}
+.lobby-count-badge{font-size:.75rem;background:#0d0b17;border:1px solid #2d2640;border-radius:20px;padding:3px 12px;color:#7c6fa0;font-family:'Courier New',monospace;transition:color .3s}
+.lobby-count-badge.ready{color:#4ade80;border-color:rgba(74,222,128,.3)}
+.players-list{display:flex;flex-direction:column;gap:.5rem}
+.player-item{display:flex;align-items:center;gap:.85rem;padding:.85rem 1rem;border-radius:12px;background:#0d0b17;border:1px solid #1a1530;font-size:.9rem;animation:slideIn .3s ease}
+.player-item.host{border-color:rgba(192,132,252,.25);background:linear-gradient(90deg,#0f0d1e 0%,#0d0b17 100%)}
+@keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.player-num{width:26px;height:26px;border-radius:50%;background:#1a1530;border:1px solid #2d2640;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#7c6fa0;flex-shrink:0}
+.player-item.host .player-num{background:rgba(192,132,252,.15);border-color:rgba(192,132,252,.3);color:#c084fc}
+.player-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;flex-shrink:0;box-shadow:0 0 6px rgba(74,222,128,.5)}
+.player-name-wrap{flex:1;min-width:0}
+.player-name-text{font-weight:600;color:#e8e0ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.player-you-tag{font-size:.7rem;color:#7c6fa0;font-weight:400;margin-left:4px}
+.host-badge{font-size:.62rem;background:rgba(192,132,252,.13);color:#c084fc;padding:3px 9px;border-radius:20px;letter-spacing:1px;flex-shrink:0}
+.empty-slots{margin-top:.5rem}
+.empty-slot{display:flex;align-items:center;gap:.85rem;padding:.65rem 1rem;border-radius:12px;border:1px dashed #1a1530;margin-bottom:.4rem;opacity:.4}
+.empty-slot-num{width:26px;height:26px;border-radius:50%;border:1px dashed #2d2640;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:#2d2640}
+.empty-slot-text{font-size:.78rem;color:#2d2640;letter-spacing:1px}
+.lobby-bottom{display:flex;flex-direction:column;gap:.6rem}
+.lobby-status{text-align:center;color:#7c6fa0;font-size:.8rem;letter-spacing:1px;padding:.5rem}
+#game-screen.active{justify-content:flex-start;padding:.75rem}
+.game-header{width:100%;max-width:720px;display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.25rem;background:#13111f;border-radius:12px;border:1px solid #2d2640;margin-bottom:.75rem}
+.game-round{font-size:.75rem;color:#7c6fa0;letter-spacing:2px}
+.range-display{font-size:1rem;font-weight:700;color:#c084fc}
+.turn-indicator{width:100%;max-width:720px;padding:.85rem 1.25rem;border-radius:10px;text-align:center;margin-bottom:.75rem;font-size:.95rem;font-weight:600;transition:all .3s}
+.turn-mine{background:rgba(192,132,252,.13);border:1px solid rgba(192,132,252,.35);color:#d8a8ff}
+.turn-other{background:#13111f;border:1px solid #2d2640;color:#7c6fa0}
+.game-area{width:100%;max-width:720px;display:grid;grid-template-columns:1fr 260px;gap:.75rem}
+.guess-section{display:flex;flex-direction:column;gap:.75rem}
+.number-input-card{background:#13111f;border:1px solid #2d2640;border-radius:16px;padding:1.25rem}
+.mobile-numpad{display:none;margin-top:.75rem}
+.numpad-display{font-size:2.5rem;font-weight:700;color:#c084fc;text-align:center;padding:.75rem;background:#0d0b17;border-radius:10px;border:1px solid #2d2640;min-height:72px;display:flex;align-items:center;justify-content:center;margin-bottom:.75rem;letter-spacing:2px}
+.numpad-display.placeholder{color:#4a3f6b}
+.numpad-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem}
+.np-btn{background:#1a1530;border:1px solid #2d2640;border-radius:10px;color:#e8e0ff;font-size:1.4rem;font-weight:700;font-family:'Courier New',monospace;padding:1rem .5rem;cursor:pointer;touch-action:manipulation;transition:background .1s,transform .1s;min-height:56px}
+.np-btn:active{background:#2d2640;transform:scale(.95)}
+.np-btn.del{color:#f472b6;font-size:1.1rem}
+.np-btn.empty{background:transparent;border-color:transparent;pointer-events:none}
+.desktop-input-wrapper{display:block}
+.hint-bar{display:flex;gap:.5rem;margin-top:.75rem;flex-wrap:wrap}
+.history-card{background:#13111f;border:1px solid #2d2640;border-radius:16px;padding:1.25rem;overflow-y:auto;max-height:260px;-webkit-overflow-scrolling:touch}
+.players-panel{background:#13111f;border:1px solid #2d2640;border-radius:16px;padding:1.25rem;align-self:start}
+.panel-title{font-size:.7rem;color:#4a3f6b;letter-spacing:2px;text-transform:uppercase;margin-bottom:1rem}
+.score-item{display:flex;align-items:center;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid #1a1530;font-size:.85rem}
+.score-item:last-child{border:none}
+.score-name{display:flex;align-items:center;gap:.5rem}
+.active-player{color:#c084fc;font-weight:700}
+.darra-count{font-size:.8rem;color:#7c6fa0}
+#round-over-screen.active,#gameover-screen.active{justify-content:center}
+.result-screen{text-align:center;padding:1.5rem;max-width:480px;width:100%}
+.result-emoji{font-size:4rem;margin-bottom:1rem}
+.result-title{font-size:1.8rem;font-weight:700;color:#c084fc;margin-bottom:.5rem}
+.result-sub{color:#7c6fa0;font-size:.9rem;margin-bottom:1.5rem;line-height:1.6}
+.final-scores{width:100%;background:#13111f;border-radius:12px;border:1px solid #2d2640;padding:1rem;margin-bottom:1.5rem}
+.final-item{display:flex;justify-content:space-between;padding:.6rem .75rem;border-radius:8px;margin-bottom:.3rem;font-size:.9rem}
+.final-item.loser-row{background:rgba(192,132,252,.1);border:1px solid rgba(192,132,252,.25)}
+.final-item.winner-row{background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2)}
+.darras{color:#ef4444}
+.notification{position:fixed;top:1rem;right:1rem;left:1rem;background:#1a1530;border:1px solid rgba(192,132,252,.35);border-radius:10px;padding:.85rem 1.25rem;font-size:.9rem;color:#e8e0ff;z-index:999;transform:translateY(-120%);transition:transform .3s;text-align:center}
+.notification.show{transform:translateY(0)}
+
+/* Solo mobile numpad */
+.solo-numpad-display{font-size:2.8rem;font-weight:700;color:#c084fc;text-align:center;padding:.85rem;background:#0d0b17;border-radius:10px;border:1px solid #2d2640;min-height:80px;display:flex;align-items:center;justify-content:center;margin-bottom:.85rem;letter-spacing:3px}
+.solo-numpad-display.placeholder{color:#4a3f6b}
+.solo-mobile-numpad{display:none}
+.solo-desktop-input{display:block}
+
+@media(max-width:620px){
+  .logo{font-size:2.2rem}.tagline{font-size:.72rem;letter-spacing:2px;margin-bottom:2rem}.card{padding:1.5rem 1.25rem}
+  .mode-cards{grid-template-columns:1fr 1fr;gap:.75rem}.mode-card{padding:1.5rem .85rem}.mode-icon{font-size:2.2rem}.mode-title{font-size:.95rem}.mode-desc{font-size:.68rem}
+  #game-screen.active{padding:.6rem}.game-area{grid-template-columns:1fr}
+  .desktop-input-wrapper{display:none}.mobile-numpad{display:block}
+  .players-panel{order:-1;padding:.85rem 1rem}#game-players{display:flex;flex-wrap:wrap;gap:.4rem}
+  .score-item{flex:1;min-width:130px;border-bottom:none;background:#0d0b17;border-radius:8px;padding:.4rem .6rem;border:1px solid #1a1530;font-size:.78rem}
+  .history-card{max-height:200px}.game-header{padding:.7rem 1rem}.range-display{font-size:.9rem}
+  #solo-screen.active{padding:.6rem}.solo-area{gap:.6rem}
+  .solo-desktop-input{display:none}.solo-mobile-numpad{display:block}
+  .solo-history-card{max-height:180px}
+  .win-stats-grid{grid-template-columns:1fr 1fr 1fr}
+}
+@media(max-width:380px){.logo{font-size:1.8rem}.np-btn{font-size:1.2rem;min-height:50px}.mode-cards{gap:.5rem}}
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+
+<!-- HOME SCREEN -->
+<div id="home-screen" class="screen active">
+  <div style="text-align:center;margin-bottom:2rem">
+    <div class="logo">RAQAM</div>
+    <div class="tagline">Son topish o'yini • 0–500</div>
+  </div>
+  <div class="card">
+    <label class="input-label">Ismingiz</label>
+    <input type="text" id="player-name" placeholder="Ismingizni kiriting..." maxlength="16" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false">
+    <button class="btn btn-primary" onclick="goModeSelect()">O'yinni boshlash →</button>
+  </div>
+</div>
+
+<!-- MODE SELECT SCREEN -->
+<div id="mode-screen" class="screen">
+  <div class="mode-wrapper">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div class="logo" style="font-size:2rem;margin-bottom:.3rem">RAQAM</div>
+      <div style="color:#7c6fa0;font-size:.8rem;letter-spacing:2px">O'yin turini tanlang</div>
+    </div>
+    <div class="mode-cards">
+      <div class="mode-card" onclick="goMultiplayer()">
+        <div class="mode-icon">👥</div>
+        <div class="mode-title">Ko'p kishilik</div>
+        <div class="mode-desc">Do'stlaringiz bilan birga o'ynang, xona oching yoki kiring</div>
+        <div class="mode-badge">2–10 KISHI</div>
+      </div>
+      <div class="mode-card" onclick="goSolo()">
+        <div class="mode-icon">🎯</div>
+        <div class="mode-title">1 kishilik</div>
+        <div class="mode-desc">Yolg'iz o'ynang, eng kam taxmin bilan sonni toping</div>
+        <div class="mode-badge">SOLO</div>
+      </div>
+    </div>
+    <button class="btn btn-secondary" onclick="showScreen('home-screen')" style="max-width:200px">← Orqaga</button>
+  </div>
+</div>
+
+<!-- SOLO SCREEN -->
+<div id="solo-screen" class="screen">
+  <div class="solo-header" style="width:100%;max-width:580px">
+    <div>
+      <div style="font-size:.7rem;color:#4a3f6b;letter-spacing:2px">1 KISHILIK REJIM</div>
+      <div class="range-display" id="solo-range-display" style="margin-top:3px">0 — 500</div>
+    </div>
+    <div class="solo-stats">
+      <div class="solo-stat">
+        <div class="solo-stat-val" id="solo-guess-count">0</div>
+        <div class="solo-stat-lbl">Taxmin</div>
+      </div>
+      <div class="solo-stat">
+        <div class="solo-stat-val" id="solo-best-display" style="color:#4ade80">—</div>
+        <div class="solo-stat-lbl">Rekord</div>
+      </div>
+    </div>
+    <button onclick="soloQuit()" style="background:transparent;border:1px solid #2d2640;border-radius:8px;padding:.4rem .85rem;color:#7c6fa0;font-family:'Courier New',monospace;font-size:.8rem;cursor:pointer;touch-action:manipulation">✕ Chiqish</button>
+  </div>
+
+  <div class="solo-area">
+    <div class="solo-input-card">
+      <div class="range-badge" id="solo-range-badge">0 — 500 orasidan toping</div>
+
+      <!-- Desktop input -->
+      <div class="solo-desktop-input">
+        <input type="number" id="solo-guess-input"
+          style="font-size:2.5rem;text-align:center;font-weight:700;color:#c084fc;padding:1rem;margin-bottom:0;width:100%;background:#0d0b17;border:1px solid #2d2640;border-radius:10px;outline:none"
+          placeholder="?" min="0" max="500">
+      </div>
+
+      <!-- Mobile numpad -->
+      <div class="solo-mobile-numpad">
+        <div class="solo-numpad-display placeholder" id="solo-numpad-display">?</div>
+        <div class="numpad-grid">
+          <button class="np-btn" onclick="soloNumpad('1')">1</button>
+          <button class="np-btn" onclick="soloNumpad('2')">2</button>
+          <button class="np-btn" onclick="soloNumpad('3')">3</button>
+          <button class="np-btn" onclick="soloNumpad('4')">4</button>
+          <button class="np-btn" onclick="soloNumpad('5')">5</button>
+          <button class="np-btn" onclick="soloNumpad('6')">6</button>
+          <button class="np-btn" onclick="soloNumpad('7')">7</button>
+          <button class="np-btn" onclick="soloNumpad('8')">8</button>
+          <button class="np-btn" onclick="soloNumpad('9')">9</button>
+          <button class="np-btn empty"></button>
+          <button class="np-btn" onclick="soloNumpad('0')">0</button>
+          <button class="np-btn del" onclick="soloNumpad('del')">⌫</button>
+        </div>
+      </div>
+
+      <div class="solo-hint-box" id="solo-hint-box">
+        <span class="solo-hint-text" id="solo-hint-text">Birinchi taxminingizni kiriting...</span>
+      </div>
+      <button class="btn btn-primary" style="margin-top:1rem" id="solo-guess-btn" onclick="soloMakeGuess()">Taxmin qilish →</button>
+    </div>
+
+    <div class="solo-history-card">
+      <div class="history-title">Taxminlar tarixi</div>
+      <div id="solo-guess-history"><div style="color:#4a3f6b;font-size:.8rem;text-align:center;padding:1rem">Hali taxmin yo'q</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SOLO WIN SCREEN -->
+<div id="solo-win-screen" class="screen">
+  <div class="win-screen">
+    <div class="win-emoji" id="win-emoji">🎯</div>
+    <div class="win-title" id="win-title">Topildi!</div>
+    <div class="win-sub" id="win-sub"></div>
+    <div class="win-stats-grid">
+      <div class="win-stat-card">
+        <div class="win-stat-val" id="win-secret">—</div>
+        <div class="win-stat-lbl">Maxfiy son</div>
+      </div>
+      <div class="win-stat-card">
+        <div class="win-stat-val" id="win-guesses">—</div>
+        <div class="win-stat-lbl">Taxmin soni</div>
+      </div>
+      <div class="win-stat-card">
+        <div class="win-stat-val win-best" id="win-record">—</div>
+        <div class="win-stat-lbl">Rekord</div>
+      </div>
+    </div>
+    <div class="win-buttons">
+      <button class="btn btn-primary" onclick="soloPlayAgain()">Yana o'ynash →</button>
+      <button class="btn btn-secondary" onclick="backToModeSelect()">← Rejim tanlash</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOBBY SCREEN -->
+<div id="lobby-screen" class="screen">
+  <div class="lobby-wrapper">
+    <div class="lobby-code-card">
+      <div class="lobby-code-label">Xona kodi — do'stlaringizga bering</div>
+      <span class="room-code" id="display-code" onclick="copyCode()">----</span>
+      <div><button class="share-btn" onclick="copyCode()"><span>📤</span> Ulashish / Nusxalash</button></div>
+    </div>
+    <div class="lobby-players-card">
+      <div class="lobby-players-header">
+        <div class="lobby-players-title">O'yinchilar</div>
+        <div class="lobby-count-badge" id="lobby-count-badge">0 / 10</div>
+      </div>
+      <div class="players-list" id="lobby-players"></div>
+      <div class="empty-slots" id="empty-slots"></div>
+    </div>
+    <div class="lobby-bottom">
+      <div class="lobby-status" id="lobby-status">O'yinchilar kutilmoqda...</div>
+      <div id="host-controls" style="display:none">
+        <button class="btn btn-primary" id="start-btn" onclick="startGame()" disabled>O'yinni boshlash</button>
+      </div>
+      <div id="guest-waiting" style="display:none;text-align:center;color:#4a3f6b;font-size:.85rem;padding:.5rem">⏳ Xona egasi o'yinni boshlaguncha kuting...</div>
+      <button class="btn btn-secondary" onclick="leaveRoom()">← Chiqish</button>
+    </div>
+  </div>
+</div>
+
+<!-- MULTIPLAYER GAME SCREEN -->
+<div id="game-screen" class="screen">
+  <div class="game-header">
+    <div>
+      <div class="game-round" id="round-label">RAUND 1</div>
+      <div style="font-size:.8rem;color:#7c6fa0;margin-top:3px" id="guess-count-label">0 ta taxmin</div>
+    </div>
+    <div class="range-display" id="range-display">0 — 500</div>
+    <div style="text-align:right">
+      <div style="font-size:.7rem;color:#4a3f6b">XONA</div>
+      <div style="font-size:1rem;font-weight:700;color:#c084fc" id="game-room-code">----</div>
+    </div>
+  </div>
+  <div class="turn-indicator turn-other" id="turn-indicator">Yuklanmoqda...</div>
+  <div class="game-area">
+    <div class="guess-section">
+      <div class="number-input-card">
+        <div class="desktop-input-wrapper">
+          <input type="number" id="guess-input" style="font-size:2.5rem;text-align:center;font-weight:700;color:#c084fc;padding:1rem;margin-bottom:0;width:100%;background:#0d0b17;border:1px solid #2d2640;border-radius:10px;outline:none" placeholder="?" min="0" max="500" disabled>
+        </div>
+        <div class="mobile-numpad">
+          <div class="numpad-display placeholder" id="numpad-display">?</div>
+          <div class="numpad-grid">
+            <button class="np-btn" onclick="numpadPress('1')">1</button>
+            <button class="np-btn" onclick="numpadPress('2')">2</button>
+            <button class="np-btn" onclick="numpadPress('3')">3</button>
+            <button class="np-btn" onclick="numpadPress('4')">4</button>
+            <button class="np-btn" onclick="numpadPress('5')">5</button>
+            <button class="np-btn" onclick="numpadPress('6')">6</button>
+            <button class="np-btn" onclick="numpadPress('7')">7</button>
+            <button class="np-btn" onclick="numpadPress('8')">8</button>
+            <button class="np-btn" onclick="numpadPress('9')">9</button>
+            <button class="np-btn empty"></button>
+            <button class="np-btn" onclick="numpadPress('0')">0</button>
+            <button class="np-btn del" onclick="numpadPress('del')">⌫</button>
+          </div>
+        </div>
+        <div class="hint-bar" id="hint-bar"></div>
+        <button class="btn btn-primary" style="margin-top:1rem" id="guess-btn" onclick="makeGuess()" disabled>Taxmin qilish →</button>
+      </div>
+      <div class="history-card">
+        <div class="history-title">Taxminlar tarixi</div>
+        <div id="guess-history"><div style="color:#4a3f6b;font-size:.8rem;text-align:center;padding:1rem">Hali taxmin yo'q</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="players-panel">
+        <div class="panel-title">O'yinchilar</div>
+        <div id="game-players"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ROUND OVER SCREEN -->
+<div id="round-over-screen" class="screen">
+  <div class="result-screen">
+    <div class="result-emoji">🎯</div>
+    <div class="result-title" id="round-title">Son topildi!</div>
+    <div class="result-sub" id="round-sub"></div>
+    <div class="final-scores" id="round-scores"></div>
+    <div id="round-controls"></div>
+  </div>
+</div>
+
+<!-- GAME OVER SCREEN -->
+<div id="gameover-screen" class="screen">
+  <div class="result-screen">
+    <div class="result-emoji">🏆</div>
+    <div class="result-title">O'yin tugadi!</div>
+    <div class="result-sub" id="gameover-sub"></div>
+    <div class="final-scores" id="gameover-scores"></div>
+    <button class="btn btn-primary" onclick="backToModeSelect()" style="max-width:300px;margin-top:.5rem">Rejim tanlash</button>
+  </div>
+</div>
+
+<div class="notification" id="notif"></div>
+
+<script>
+// ========== STATE ==========
+let myId   = 'p_' + Math.random().toString(36).substr(2,9);
+let myName = '';
+let currentRoom = null;
+let isHost = false;
+let syncInterval = null;
+let heartbeatInterval = null;
+let lastActionSeen = null;
+let numpadValue = '';
+let _lobbyKnownIds = [];
+
+// ===== SOLO STATE =====
+let soloSecret = 0;
+let soloGuessCount = 0;
+let soloRangeLow = 0;
+let soloRangeHigh = 500;
+let soloGuesses = [];
+let soloBest = null;
+let soloNumpadVal = '';
+
+// ========== STORAGE HELPERS ==========
+async function getRoomData(code) {
+  try { const r = await window.storage.get('room_' + code, true); return r ? JSON.parse(r.value) : null; } catch(e) { return null; }
+}
+async function setRoomData(code, data) {
+  try { await window.storage.set('room_' + code, JSON.stringify(data), true); } catch(e) {}
+}
+async function deleteRoomData(code) {
+  try { await window.storage.delete('room_' + code, true); } catch(e) {}
+}
+
+// ========== UTILS ==========
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function genCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let c = '';
+  for (let i=0;i<4;i++) c += chars[Math.floor(Math.random()*chars.length)];
+  return c;
+}
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+let notifTimer = null;
+function notify(msg, duration=3000) {
+  const el = document.getElementById('notif');
+  el.textContent = msg;
+  el.classList.add('show');
+  if (notifTimer) clearTimeout(notifTimer);
+  notifTimer = setTimeout(() => el.classList.remove('show'), duration);
+}
+function copyCode() {
+  if (!currentRoom) return;
+  if (navigator.share) {
+    navigator.share({ title:"RAQAM o'yini", text:"RAQAM o'yiniga qo'shiling! Xona kodi: " + currentRoom }).catch(()=>{});
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(currentRoom)
+      .then(() => notify('Kod nusxalandi: ' + currentRoom))
+      .catch(() => notify('Kod: ' + currentRoom, 5000));
+  } else { notify('Kod: ' + currentRoom, 5000); }
+}
+
+// ========== NAVIGATION ==========
+function goModeSelect() {
+  myName = document.getElementById('player-name').value.trim();
+  if (!myName) { notify('Ismingizni kiriting!'); return; }
+  showScreen('mode-screen');
+}
+
+function goMultiplayer() {
+  showScreen('home-screen');
+  // show the multiplayer sub-panel inside home
+  _showMultiplayerPanel();
+}
+
+function _showMultiplayerPanel() {
+  // Re-use mode-screen but show multiplayer join UI
+  showScreen('multi-join-screen');
+}
+
+function goSolo() {
+  soloStartGame();
+}
+
+function backToModeSelect() {
+  stopSync();
+  currentRoom = null;
+  isHost = false;
+  lastActionSeen = null;
+  _lobbyKnownIds = [];
+  showScreen('mode-screen');
+}
+
+// ========== MULTIPLAYER JOIN SCREEN ==========
+// We'll inject this screen dynamically
+(function injectMultiJoinScreen() {
+  const div = document.createElement('div');
+  div.id = 'multi-join-screen';
+  div.className = 'screen';
+  div.innerHTML = `
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div class="logo" style="font-size:2rem">👥 Ko'p Kishilik</div>
+      <div style="color:#7c6fa0;font-size:.78rem;letter-spacing:2px;margin-top:.3rem">Xona oching yoki mavjudiga kiring</div>
+    </div>
+    <div class="card">
+      <label class="input-label">Ismingiz</label>
+      <div style="background:#0d0b17;border:1px solid #2d2640;border-radius:10px;padding:.85rem 1rem;font-size:1.1rem;color:#c084fc;margin-bottom:1rem;font-weight:700" id="multi-name-display"></div>
+      <button class="btn btn-primary" onclick="createRoom()">+ Yangi xona ochish</button>
+      <div class="divider"><span>yoki mavjud xonaga kiring</span></div>
+      <label class="input-label">Xona kodi</label>
+      <input type="text" id="room-code-input" placeholder="XXXX" maxlength="4" style="text-transform:uppercase;letter-spacing:4px;text-align:center" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+      <button class="btn btn-secondary" onclick="joinRoom()">Xonaga kirish →</button>
+      <button class="btn btn-danger" onclick="showScreen('mode-screen')" style="margin-top:.5rem">← Orqaga</button>
+    </div>`;
+  document.body.appendChild(div);
+  div.querySelector('#room-code-input').addEventListener('keydown', e => { if(e.key==='Enter') joinRoom(); });
+  div.querySelector('#room-code-input').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase(); });
+})();
+
+// Override goMultiplayer to show multi-join
+function goMultiplayer() {
+  document.getElementById('multi-name-display').textContent = myName;
+  showScreen('multi-join-screen');
+}
+
+// ========== SOLO GAME ==========
+function soloStartGame() {
+  soloSecret = Math.floor(Math.random() * 501);
+  soloGuessCount = 0;
+  soloRangeLow = 0;
+  soloRangeHigh = 500;
+  soloGuesses = [];
+  soloNumpadVal = '';
+  resetSoloNumpad();
+  document.getElementById('solo-guess-count').textContent = '0';
+  document.getElementById('solo-range-display').textContent = '0 — 500';
+  document.getElementById('solo-range-badge').textContent = '0 — 500 orasidan toping';
+  document.getElementById('solo-hint-box').innerHTML = '<span class="solo-hint-text" id="solo-hint-text">Birinchi taxminingizni kiriting...</span>';
+  document.getElementById('solo-guess-history').innerHTML = '<div style="color:#4a3f6b;font-size:.8rem;text-align:center;padding:1rem">Hali taxmin yo\'q</div>';
+  const bi = document.getElementById('solo-best-display');
+  bi.textContent = soloBest !== null ? soloBest : '—';
+
+  const inp = document.getElementById('solo-guess-input');
+  if (inp) { inp.value = ''; inp.min = 0; inp.max = 500; }
+  showScreen('solo-screen');
+  if (window.innerWidth > 620) { setTimeout(()=>{ const i=document.getElementById('solo-guess-input'); if(i) i.focus(); }, 100); }
+}
+
+function soloNumpad(key) {
+  if (key === 'del') {
+    soloNumpadVal = soloNumpadVal.slice(0,-1);
+  } else {
+    if (soloNumpadVal.length >= 3) return;
+    soloNumpadVal += key;
+    if (soloNumpadVal.length > 1 && soloNumpadVal[0] === '0') soloNumpadVal = soloNumpadVal.slice(1);
+  }
+  const disp = document.getElementById('solo-numpad-display');
+  if (soloNumpadVal === '') { disp.textContent='?'; disp.classList.add('placeholder'); }
+  else { disp.textContent=soloNumpadVal; disp.classList.remove('placeholder'); }
+  const si = document.getElementById('solo-guess-input');
+  if (si) si.value = soloNumpadVal;
+}
+
+function resetSoloNumpad() {
+  soloNumpadVal = '';
+  const disp = document.getElementById('solo-numpad-display');
+  if (disp) { disp.textContent='?'; disp.classList.add('placeholder'); }
+  const si = document.getElementById('solo-guess-input');
+  if (si) si.value = '';
+}
+
+function soloMakeGuess() {
+  const inp = document.getElementById('solo-guess-input');
+  const rawVal = window.innerWidth <= 620 ? soloNumpadVal : inp.value;
+  const num = parseInt(rawVal, 10);
+
+  if (isNaN(num)) { notify('Son kiriting!'); return; }
+  if (num < soloRangeLow || num > soloRangeHigh) {
+    notify(soloRangeLow + ' dan ' + soloRangeHigh + " gacha son kiriting!"); return;
+  }
+
+  soloGuessCount++;
+  document.getElementById('solo-guess-count').textContent = soloGuessCount;
+
+  let result, hintHtml = '', hintMsg = '';
+
+  if (num === soloSecret) {
+    result = 'found';
+  } else if (num < soloSecret) {
+    result = 'higher';
+    soloRangeLow = num + 1;
+    hintHtml += '<span class="hint-tag hint-higher">↑ KATTAROQ</span>';
+    hintMsg = num + ' dan katta son ayting';
+  } else {
+    result = 'lower';
+    soloRangeHigh = num - 1;
+    hintHtml += '<span class="hint-tag hint-lower">↓ KICHIKROQ</span>';
+    hintMsg = num + ' dan kichik son ayting';
+  }
+
+  if (result !== 'found') {
+    const dist = Math.abs(num - soloSecret);
+    if (dist <= 10) hintHtml += '<span class="hint-tag hint-hot">🔥 JUDA ISSIQ!</span>';
+    else if (dist <= 30) hintHtml += '<span class="hint-tag hint-warm">🌡️ ISSIQ</span>';
+    else if (dist <= 70) hintHtml += '<span class="hint-tag hint-warm2">❄️ ILIQ</span>';
+    else hintHtml += '<span class="hint-tag hint-cold">🧊 SOVUQ</span>';
+  }
+
+  soloGuesses.push({ num, result });
+
+  // Update range
+  document.getElementById('solo-range-display').textContent = soloRangeLow + ' — ' + soloRangeHigh;
+  document.getElementById('solo-range-badge').textContent = soloRangeLow + ' — ' + soloRangeHigh + ' orasidan toping';
+
+  // Update hint
+  const hb = document.getElementById('solo-hint-box');
+  if (result === 'found') {
+    hb.innerHTML = '<span class="hint-tag res-found" style="font-size:.9rem">🎯 Topildi! Barakalla!</span>';
+  } else {
+    hb.innerHTML = hintHtml + '<span class="solo-hint-text" style="margin-left:.25rem">' + hintMsg + '</span>';
+  }
+
+  // Update history
+  updateSoloHistory();
+  resetSoloNumpad();
+
+  if (result === 'found') {
+    setTimeout(() => soloWin(), 400);
+  }
+}
+
+function updateSoloHistory() {
+  const hist = document.getElementById('solo-guess-history');
+  if (soloGuesses.length === 0) {
+    hist.innerHTML = '<div style="color:#4a3f6b;font-size:.8rem;text-align:center;padding:1rem">Hali taxmin yo\'q</div>';
+    return;
+  }
+  let html = '';
+  soloGuesses.slice().reverse().forEach((g, ri) => {
+    const i = soloGuesses.length - 1 - ri;
+    const rc = g.result==='higher'?'res-higher':g.result==='lower'?'res-lower':'res-found';
+    const rt = g.result==='higher'?'↑ Kattaroq':g.result==='lower'?'↓ Kichikroq':'🎯 Topildi!';
+    html += `<div class="history-item">
+      <div>
+        <div class="history-num">${g.num}</div>
+        <div class="history-meta">${i+1}-taxmin</div>
+      </div>
+      <div class="${rc}" style="font-size:.8rem">${rt}</div>
+    </div>`;
+  });
+  hist.innerHTML = html;
+}
+
+function soloWin() {
+  // Update best
+  if (soloBest === null || soloGuessCount < soloBest) {
+    soloBest = soloGuessCount;
+  }
+
+  const emoji = soloGuessCount <= 5 ? '🏆' : soloGuessCount <= 10 ? '🎯' : soloGuessCount <= 20 ? '😊' : '😅';
+  const msg = soloGuessCount <= 5 ? "Ajoyib! Siz dahosiz!" : soloGuessCount <= 10 ? "Zo'r! Juda yaxshi natija!" : soloGuessCount <= 20 ? "Yaxshi! Keyingi safar yanada yaxshiroq bo'ladi!" : "Qiyinroq edi, lekin topdingiz!";
+
+  document.getElementById('win-emoji').textContent = emoji;
+  document.getElementById('win-title').textContent = soloGuessCount + ' taxminda topildi!';
+  document.getElementById('win-sub').textContent = msg;
+  document.getElementById('win-secret').textContent = soloSecret;
+  document.getElementById('win-guesses').textContent = soloGuessCount;
+  document.getElementById('win-record').textContent = soloBest;
+
+  showScreen('solo-win-screen');
+}
+
+function soloPlayAgain() {
+  soloStartGame();
+}
+
+function soloQuit() {
+  showScreen('mode-screen');
+}
+
+// ========== MULTIPLAYER NUMPAD ==========
+function numpadPress(key) {
+  if (!currentRoom) return;
+  getRoomData(currentRoom).then(room => {
+    if (!room) return;
+    const tIdx = room.currentTurnIdx % room.players.length;
+    const cur = room.players[tIdx];
+    if (!cur || cur.id !== myId) return;
+    if (key === 'del') {
+      numpadValue = numpadValue.slice(0,-1);
+    } else {
+      if (numpadValue.length >= 3) return;
+      numpadValue += key;
+      if (numpadValue.length > 1 && numpadValue[0] === '0') numpadValue = numpadValue.slice(1);
+    }
+    const disp = document.getElementById('numpad-display');
+    if (numpadValue === '') { disp.textContent='?'; disp.classList.add('placeholder'); }
+    else { disp.textContent=numpadValue; disp.classList.remove('placeholder'); }
+    document.getElementById('guess-input').value = numpadValue;
+  });
+}
+function resetNumpad() {
+  numpadValue = '';
+  const disp = document.getElementById('numpad-display');
+  if (disp) { disp.textContent='?'; disp.classList.add('placeholder'); }
+  const gi = document.getElementById('guess-input');
+  if (gi) gi.value = '';
+}
+
+// ========== CREATE / JOIN ==========
+async function createRoom() {
+  const code = genCode();
+  const room = {
+    code, host:myId, status:'lobby',
+    players:[{id:myId,name:myName,darras:0,lastSeen:Date.now()}],
+    guesses:[],secretNumber:null,currentTurnIdx:0,
+    round:1,guessCount:0,rangeLow:0,rangeHigh:500,
+    roundLoser:null,roundLoserName:null,darrasGiven:0,actionId:null
+  };
+  await setRoomData(code, room);
+  currentRoom = code;
+  isHost = true;
+  enterLobby();
+}
+
+async function joinRoom() {
+  const code = document.getElementById('room-code-input').value.trim().toUpperCase();
+  if (code.length !== 4) { notify("To'g'ri 4 harfli kod kiriting!"); return; }
+
+  const room = await getRoomData(code);
+  if (!room) { notify('Bu kod bilan xona topilmadi!'); return; }
+  if (room.status !== 'lobby') { notify("O'yin allaqachon boshlangan!"); return; }
+  if (room.players.length >= 10) { notify("Xona to'lgan (max 10 kishi)!"); return; }
+
+  const already = room.players.find(p => p.id === myId);
+  if (already) { notify('Siz allaqachon bu xondasiz!'); return; }
+
+  room.players.push({id:myId,name:myName,darras:0,lastSeen:Date.now()});
+  await setRoomData(code, room);
+  currentRoom = code;
+  isHost = false;
+  enterLobby();
+}
+
+// ========== LOBBY ==========
+function enterLobby() {
+  showScreen('lobby-screen');
+  document.getElementById('display-code').textContent = currentRoom;
+  document.getElementById('game-room-code').textContent = currentRoom;
+  if (isHost) {
+    document.getElementById('host-controls').style.display = 'block';
+    document.getElementById('guest-waiting').style.display = 'none';
+  } else {
+    document.getElementById('host-controls').style.display = 'none';
+    document.getElementById('guest-waiting').style.display = 'block';
+  }
+  startSync();
+}
+
+function renderLobby(room) {
+  const now = Date.now();
+  const alive = room.players.filter(p => now - p.lastSeen < 9000);
+  const MAX = 10;
+  const newIds = alive.map(p=>p.id).filter(id => _lobbyKnownIds.indexOf(id)===-1);
+  _lobbyKnownIds = alive.map(p=>p.id);
+  const html = alive.map((p,i) => {
+    const h = p.id === room.host;
+    const isNew = newIds.indexOf(p.id) !== -1;
+    return `<div class="player-item ${h?'host':''}" style="${isNew?'animation:slideIn .3s ease':'animation:none'}">
+      <div class="player-num">${i+1}</div>
+      <div class="player-dot"></div>
+      <div class="player-name-wrap">
+        <span class="player-name-text">${escHtml(p.name)}${p.id===myId?'<span class="player-you-tag">(siz)</span>':''}</span>
+      </div>
+      ${h?'<span class="host-badge">XONA EGASI</span>':''}
+    </div>`;
+  }).join('');
+  document.getElementById('lobby-players').innerHTML = html;
+  const emptyCount = Math.min(3, MAX - alive.length);
+  let eHtml = '';
+  for (let i=0;i<emptyCount;i++) {
+    eHtml += `<div class="empty-slot"><div class="empty-slot-num">${alive.length+i+1}</div><span class="empty-slot-text">kutilmoqda...</span></div>`;
+  }
+  document.getElementById('empty-slots').innerHTML = eHtml;
+  const badge = document.getElementById('lobby-count-badge');
+  if (badge) { badge.textContent=alive.length+' / '+MAX; badge.className='lobby-count-badge'+(alive.length>=2?' ready':''); }
+  const statusEl = document.getElementById('lobby-status');
+  if (alive.length<2) { statusEl.textContent="O'yin boshlash uchun kamida 2 kishi kerak"; statusEl.style.color='#4a3f6b'; }
+  else { statusEl.textContent=alive.length+" kishi tayyor — o'yin boshlash mumkin!"; statusEl.style.color='#4ade80'; }
+  const btn = document.getElementById('start-btn');
+  if (btn) {
+    if (alive.length<2) { btn.disabled=true; btn.textContent='Kamida 2 kishi kerak'; }
+    else { btn.disabled=false; btn.textContent=`O'yinni boshlash (${alive.length} kishi) →`; }
+  }
+}
+
+async function leaveRoom() {
+  _lobbyKnownIds = [];
+  if (currentRoom) {
+    const room = await getRoomData(currentRoom);
+    if (room) {
+      room.players = room.players.filter(p => p.id !== myId);
+      if (room.players.length === 0) { await deleteRoomData(currentRoom); }
+      else { if (room.host===myId) room.host=room.players[0].id; await setRoomData(currentRoom, room); }
+    }
+  }
+  stopSync();
+  currentRoom = null;
+  isHost = false;
+  showScreen('mode-screen');
+}
+
+// ========== START GAME ==========
+async function startGame() {
+  const room = await getRoomData(currentRoom);
+  if (!room) return;
+  const now = Date.now();
+  const alive = room.players.filter(p => now - p.lastSeen < 9000);
+  if (alive.length < 2) { notify('Kamida 2 kishi kerak!'); return; }
+  room.status='playing';room.secretNumber=Math.floor(Math.random()*501);
+  room.players=alive;room.currentTurnIdx=0;room.guessCount=0;
+  room.guesses=[];room.round=1;room.rangeLow=0;room.rangeHigh=500;
+  room.roundLoser=null;room.roundLoserName=null;room.darrasGiven=0;
+  room.actionId='start_'+Date.now();
+  await setRoomData(currentRoom, room);
+}
+
+// ========== GAME ==========
+function enterGame(room) { showScreen('game-screen'); resetNumpad(); renderGame(room); }
+
+function renderGame(room) {
+  const players = room.players;
+  const tIdx = room.currentTurnIdx % players.length;
+  const curPlayer = players[tIdx];
+  const isMyTurn = curPlayer && curPlayer.id === myId;
+  document.getElementById('round-label').textContent = 'RAUND ' + room.round;
+  document.getElementById('guess-count-label').textContent = room.guessCount + ' ta taxmin qilindi';
+  document.getElementById('range-display').textContent = room.rangeLow + ' — ' + room.rangeHigh;
+  const turnEl = document.getElementById('turn-indicator');
+  if (isMyTurn) { turnEl.className='turn-indicator turn-mine'; turnEl.textContent='🎯 Sizning navbatingiz! Son ayting.'; }
+  else { turnEl.className='turn-indicator turn-other'; turnEl.textContent=(curPlayer?escHtml(curPlayer.name):'...')+' navbati...'; }
+  const inp = document.getElementById('guess-input');
+  const btn = document.getElementById('guess-btn');
+  inp.disabled=!isMyTurn; btn.disabled=!isMyTurn; inp.min=room.rangeLow; inp.max=room.rangeHigh;
+  document.querySelectorAll('.np-btn').forEach(b=>{ b.style.opacity=isMyTurn?'1':'0.3'; b.style.pointerEvents=isMyTurn?'auto':'none'; });
+  if (isMyTurn && window.innerWidth>620) inp.focus();
+  const hintBar = document.getElementById('hint-bar');
+  hintBar.innerHTML='';
+  if (room.guesses && room.guesses.length>0) {
+    const last = room.guesses[room.guesses.length-1];
+    if (last.result==='higher') hintBar.innerHTML+='<span class="hint-tag hint-higher">↑ KATTAROQ</span>';
+    else if (last.result==='lower') hintBar.innerHTML+='<span class="hint-tag hint-lower">↓ KICHIKROQ</span>';
+    const dist = Math.abs(last.num - room.secretNumber);
+    if (dist>0) {
+      if (dist<=10) hintBar.innerHTML+='<span class="hint-tag hint-hot">🔥 JUDA ISSIQ!</span>';
+      else if (dist<=30) hintBar.innerHTML+='<span class="hint-tag hint-warm">🌡️ ISSIQ</span>';
+      else if (dist<=70) hintBar.innerHTML+='<span class="hint-tag" style="background:#0c1f0c;color:#86efac;border:1px solid #166534">❄️ ILIQ</span>';
+      else hintBar.innerHTML+='<span class="hint-tag" style="background:#0f1729;color:#93c5fd;border:1px solid #1d4ed8">🧊 SOVUQ</span>';
+    }
+  }
+  const hist = document.getElementById('guess-history');
+  if (!room.guesses||room.guesses.length===0) {
+    hist.innerHTML='<div style="color:#4a3f6b;font-size:.8rem;text-align:center;padding:1rem">Hali taxmin yo\'q</div>';
+  } else {
+    let html='';
+    room.guesses.slice().reverse().forEach(g=>{
+      const rc=g.result==='higher'?'res-higher':g.result==='lower'?'res-lower':'res-found';
+      const rt=g.result==='higher'?'↑ Kattaroq':g.result==='lower'?'↓ Kichikroq':'🎯 Topildi!';
+      html+=`<div class="history-item"><div><div class="history-num">${g.num}</div><div class="history-meta">${escHtml(g.playerName)}</div></div><div class="${rc}" style="font-size:.8rem">${rt}</div></div>`;
+    });
+    hist.innerHTML=html;
+  }
+  const pEl = document.getElementById('game-players');
+  pEl.innerHTML=players.map((p,i)=>{
+    const isCur=i===tIdx;
+    let darraHtml=p.darras>0?'🩹'.repeat(Math.min(p.darras,5))+(p.darras>5?' +'+(p.darras-5):''):'<span style="color:#2d2640">—</span>';
+    return `<div class="score-item"><div class="score-name"><div class="player-dot${isCur?'':' offline'}" style="${isCur?'background:#c084fc':''}"></div><span class="${isCur?'active-player':''}">${escHtml(p.name)}${p.id===myId?' ★':''}</span>${isCur?'<span style="font-size:.7rem;color:#c084fc;margin-left:4px">◀</span>':''}</div><div class="darra-count">${darraHtml}</div></div>`;
+  }).join('');
+}
+
+// ========== MAKE GUESS (multiplayer) ==========
+async function makeGuess() {
+  const room = await getRoomData(currentRoom);
+  if (!room||room.status!=='playing') return;
+  const inp = document.getElementById('guess-input');
+  const num = parseInt(inp.value, 10);
+  if (isNaN(num)) { notify('Son kiriting!'); return; }
+  if (num<room.rangeLow||num>room.rangeHigh) { notify(room.rangeLow+' dan '+room.rangeHigh+' gacha son kiriting!'); return; }
+  const tIdx = room.currentTurnIdx % room.players.length;
+  const curPlayer = room.players[tIdx];
+  if (!curPlayer||curPlayer.id!==myId) { notify('Sizning navbatingiz emas!'); return; }
+  let result;
+  if (num===room.secretNumber) result='found';
+  else if (num<room.secretNumber) { result='higher'; room.rangeLow=num+1; }
+  else { result='lower'; room.rangeHigh=num-1; }
+  room.guesses.push({num,playerName:myName,playerId:myId,result});
+  room.guessCount++;
+  if (result==='found') {
+    const loser=room.players.find(p=>p.id===myId);
+    if (loser) loser.darras+=room.guessCount;
+    room.status='round_over'; room.roundLoser=myId; room.roundLoserName=myName;
+    room.darrasGiven=room.guessCount; room.actionId='roundover_'+Date.now();
+    await setRoomData(currentRoom, room);
+    showRoundOver(room);
+  } else {
+    room.currentTurnIdx=(tIdx+1)%room.players.length;
+    room.actionId='guess_'+Date.now();
+    await setRoomData(currentRoom, room);
+  }
+  inp.value=''; resetNumpad();
+}
+
+// ========== ROUND OVER ==========
+function showRoundOver(room) { showScreen('round-over-screen'); renderRoundOver(room); }
+function renderRoundOver(room) {
+  document.getElementById('round-title').textContent = 'Son topildi: ' + room.secretNumber;
+  document.getElementById('round-sub').textContent = escHtml(room.roundLoserName)+' '+room.guessCount+' ta taxmindan keyin sonni topdi va '+room.darrasGiven+' ta darra oldi!';
+  const sorted = room.players.slice().sort((a,b)=>a.darras-b.darras);
+  document.getElementById('round-scores').innerHTML=sorted.map(p=>{
+    const isLoser=p.id===room.roundLoser;
+    return `<div class="final-item ${isLoser?'loser-row':''}"><span>${escHtml(p.name)}${p.id===myId?' <span style="color:#7c6fa0">(siz)</span>':''}</span><span class="darras">${p.darras>0?'🩹 '+p.darras+' darra':'✓ Toza'}</span></div>`;
+  }).join('');
+  const ctrl = document.getElementById('round-controls');
+  const amHost = isHost||(room.host===myId);
+  if (amHost) {
+    ctrl.innerHTML='<button class="btn btn-primary" onclick="nextRound()" style="max-width:320px">Keyingi raund →</button><button class="btn btn-secondary" onclick="endGame()" style="max-width:320px;margin-top:.5rem">O\'yinni tugatish</button>';
+  } else {
+    ctrl.innerHTML='<div style="color:#4a3f6b;font-size:.85rem;margin-top:.5rem">Xona egasi keyingi raundni boshlaguncha kuting...</div>';
+  }
+}
+
+async function nextRound() {
+  const room = await getRoomData(currentRoom);
+  if (!room) return;
+  room.status='playing'; room.secretNumber=Math.floor(Math.random()*501); room.round++;
+  room.guessCount=0; room.guesses=[]; room.rangeLow=0; room.rangeHigh=500;
+  room.currentTurnIdx=0; room.roundLoser=null; room.roundLoserName=null;
+  room.darrasGiven=0; room.actionId='newround_'+Date.now();
+  await setRoomData(currentRoom, room);
+}
+
+async function endGame() {
+  const room = await getRoomData(currentRoom);
+  if (!room) return;
+  room.status='gameover'; room.actionId='gameover_'+Date.now();
+  await setRoomData(currentRoom, room);
+  showGameOver(room);
+}
+
+function showGameOver(room) {
+  showScreen('gameover-screen');
+  const sorted = room.players.slice().sort((a,b)=>a.darras-b.darras);
+  const winner = sorted[0];
+  document.getElementById('gameover-sub').textContent = "G'olib: "+winner.name+' (eng kam darra: '+winner.darras+')';
+  const medals=['🥇','🥈','🥉'];
+  document.getElementById('gameover-scores').innerHTML=sorted.map((p,i)=>
+    `<div class="final-item ${i===0?'winner-row':''}"><span>${medals[i]||(i+1+'.')} ${escHtml(p.name)}${p.id===myId?' <span style="color:#7c6fa0">(siz)</span>':''}</span><span class="darras">${p.darras} darra</span></div>`
+  ).join('');
+}
+
+// ========== SYNC ==========
+function startSync() {
+  stopSync();
+  heartbeatInterval = setInterval(async()=>{
+    if (!currentRoom) return;
+    const room = await getRoomData(currentRoom);
+    if (!room) return;
+    const me = room.players.find(p=>p.id===myId);
+    if (me) { me.lastSeen=Date.now(); await setRoomData(currentRoom, room); }
+  }, 2000);
+  syncInterval = setInterval(async()=>{
+    if (!currentRoom) return;
+    const room = await getRoomData(currentRoom);
+    if (!room) return;
+    const screen = (document.querySelector('.screen.active')||{}).id;
+    if (room.host===myId) isHost=true;
+    if (room.status==='lobby') { if (screen==='lobby-screen') renderLobby(room); return; }
+    if (room.status==='playing') {
+      if (screen==='lobby-screen'||screen==='round-over-screen') enterGame(room);
+      else if (screen==='game-screen') renderGame(room);
+    } else if (room.status==='round_over') {
+      if (screen==='game-screen') showRoundOver(room);
+      else if (screen==='round-over-screen') { if (room.actionId!==lastActionSeen) { lastActionSeen=room.actionId; renderRoundOver(room); } }
+    } else if (room.status==='gameover') {
+      if (screen!=='gameover-screen') showGameOver(room);
+    }
+  }, 1000);
+}
+
+function stopSync() {
+  if (syncInterval) clearInterval(syncInterval);
+  if (heartbeatInterval) clearInterval(heartbeatInterval);
+  syncInterval=null; heartbeatInterval=null;
+}
+
+// ========== KEYBOARD ==========
+document.getElementById('guess-input').addEventListener('keydown', e=>{ if(e.key==='Enter') makeGuess(); });
+document.getElementById('player-name').addEventListener('keydown', e=>{ if(e.key==='Enter') goModeSelect(); });
+document.getElementById('solo-guess-input').addEventListener('keydown', e=>{ if(e.key==='Enter') soloMakeGuess(); });
+
+// ========== ANIMATED BACKGROUND ==========
+(function(){
+  const canvas=document.getElementById('bg-canvas');
+  const ctx=canvas.getContext('2d');
+  const symbols=['?','?','?','!','✓','×','0','1','2','3','4','5','6','7','8','9','42','13','77','500','↑','↓','★','♦','∞','#','%'];
+  const particles=[];
+  let W,H;
+  function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+  window.addEventListener('resize',resize);resize();
+  function rand(a,b){return a+Math.random()*(b-a);}
+  function spawn(){
+    const palettes=['rgba(192,132,252,','rgba(139,92,246,','rgba(167,139,250,','rgba(216,180,254,','rgba(109,40,217,'];
+    const col=palettes[Math.floor(Math.random()*palettes.length)];
+    const sym=symbols[Math.floor(Math.random()*symbols.length)];
+    return {x:rand(0,W),y:rand(-H*.1,H*1.1),sym,size:rand(12,48),col,alpha:rand(.06,.15),vx:rand(-.25,.25),vy:rand(-.5,-.12),rot:rand(0,Math.PI*2),vrot:rand(-.008,.008),life:0,maxLife:rand(300,700),pulse:rand(0,Math.PI*2),pulseSpeed:rand(.01,.04)};
+  }
+  for(let i=0;i<60;i++){const p=spawn();p.life=Math.random()*p.maxLife;particles.push(p);}
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    for(let i=particles.length-1;i>=0;i--){
+      const p=particles[i];p.life++;p.x+=p.vx;p.y+=p.vy;p.rot+=p.vrot;p.pulse+=p.pulseSpeed;
+      const lr=p.life/p.maxLife;const fade=lr<.1?lr/.1:lr>.8?(1-lr)/.2:1;
+      const a=p.alpha*fade*(.7+.3*Math.sin(p.pulse));
+      ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);
+      ctx.font='bold '+p.size+'px "Courier New",monospace';
+      ctx.fillStyle=p.col+a.toFixed(3)+')';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(p.sym,0,0);ctx.restore();
+      if(p.life>p.maxLife||p.y<-100||p.x<-100||p.x>W+100)particles[i]=spawn();
+    }
+    while(particles.length<70)particles.push(spawn());
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+</body>
+</html>

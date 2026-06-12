@@ -1,0 +1,17 @@
+body{
+    background-color: coral;
+    margin: 30px auto;
+}
+
+.card{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+img{
+    width: 100px;
+    height: 100px;
+    border: 1px red solid;
+    border-radius:10px
+}

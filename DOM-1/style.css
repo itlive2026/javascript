@@ -1,0 +1,28 @@
+body{
+    background-color: cyan;
+    padding: 30px;
+    display: flex;
+    justify-content: center;
+}
+
+.card{
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 400px;
+}
+
+.product{
+    padding: 10px;
+    border-bottom: 1px solid black;
+
+}
+.name{color: red;}
+.product{color:green}
+ #checkout-btn{
+    padding: 10px;
+    background-color: blue;
+    margin-top: 20px;
+    border-radius: 10px;
+    color: white;
+}

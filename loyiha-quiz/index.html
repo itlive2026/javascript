@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bilimlar Testi</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- START SCREEN -->
+  <div id="start-screen" class="screen">
+    <div class="card">
+      <h1>🧠 Bilimlar Testi</h1>
+      <p>10 ta savol · Har bir to'g'ri javob = 10 ball</p>
+      <button id="start-btn" class="btn btn-primary">Boshlash</button>
+    </div>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div id="quiz-screen" class="screen hidden">
+    <div class="card">
+      <div class="top-bar">
+        <span id="question-counter">Savol 1 / 10</span>
+        <span id="score-display">Ball: 0</span>
+      </div>
+
+      <div class="progress-bar">
+        <div id="progress-fill"></div>
+      </div>
+
+      <h2 id="question-text">Savol matni bu yerda</h2>
+
+      <div id="answers-grid">
+        <button class="answer-btn">A</button>
+        <button class="answer-btn">B</button>
+        <button class="answer-btn">C</button>
+        <button class="answer-btn">D</button>
+      </div>
+
+      <button id="next-btn" class="btn btn-primary hidden">Keyingisi →</button>
+    </div>
+  </div>
+
+  <!-- RESULT SCREEN -->
+  <div id="result-screen" class="screen hidden">
+    <div class="card">
+      <div id="result-emoji">🎉</div>
+      <h2 id="result-title">Natija</h2>
+      <p id="result-score">Siz 80 ball oldingiz!</p>
+      <p id="result-comment">Zo'r natija!</p>
+      <button id="restart-btn" class="btn btn-primary">Qayta urinish</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
