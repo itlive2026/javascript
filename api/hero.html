@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qahramonlar</title>
+</head>
+<body>
+    <input type="number" id="search">
+    <button onclick="qidiruv()">Qidiruv</button>
+    <h1 id="name"></h1>
+    <h3 id="speed"></h3>
+    <h4 id="strong"></h4>
+    <img src="" alt="" id="image">
+</body>
+<script>
+    const search=document.getElementById("search");
+    const name=document.getElementById("name");
+    const speed=document.getElementById("speed");
+    const strong=document.getElementById("strong");
+    const image=document.getElementById("image");
+    function qidiruv(){
+        fetch(`https://akabab.github.io/superhero-api/api/id/${search.value}.json`)
+        .then(response=>response.json())
+        .then(data=>{
+            // console.log(data);
+            name.textContent=data.name
+            speed.textContent=data.powerstats.speed;
+            strong.textContent=data.powerstats.strength;
+            image.src=data.images.sm;
+        }).catch(error=>{
+            name.textContent="Topilmadi"
+        })
+    }
+</script>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ob-havo</title>
+</head>
+<body>
+    <h1 id="info"></h1>
+</body>
+<script>
+    const info=document.getElementById("info")
+    fetch("https://api.open-meteo.com/v1/forecast?latitude=40.495642&longitude=68.759039&current_weather=true")
+    .then(response=>response.json())
+    .then(data=>
+        {
+            info.textContent=`Guliston da ob havo ${data.current_weather.temperatura}`
+            console.log(data)
+        }
+    ).catch(error=>{
+        console.log("Xatolik")
+    })
+</script>
+</html>

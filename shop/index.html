@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OnlineShop - Mini Internet Do'kon</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="container header-container">
+            <h1 class="logo">OnlineShop</h1>
+            <button id="cart-btn" class="cart-button">
+                <span>🛒 Savatcha</span>
+                <span id="cart-count">0</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="container main-layout">
+        
+        <section class="products-section">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Mahsulotlarni nomidan qidiring...">
+            </div>
+
+            <h2 class="section-title">Barcha mahsulotlar</h2>
+            
+            <div id="products-container" class="products-grid">
+                <div class="loading">Mahsulotlar yuklanmoqda...</div>
+            </div>
+
+            <div class="load-more-container">
+                <button id="load-more-btn">Yana ko'rish ⬇️</button>
+            </div>
+        </section>
+
+        <section id="cart-panel" class="cart-sidebar">
+            <h2 class="sidebar-title">Sizning savatchangiz</h2>
+            
+            <div id="cart-items" class="cart-items-list">
+                <p class="empty-text">Savatchangiz hozircha bo'sh.</p>
+            </div>
+            
+            <div class="cart-summary">
+                <div class="summary-row">
+                    <span>Jami mahsulotlar:</span>
+                    <span id="total-items">0 ta</span>
+                </div>
+                <div class="summary-row total-price-row">
+                    <span>Umumiy summa:</span>
+                    <span id="total-price">$0.00</span>
+                </div>
+                <button id="clear-cart" class="clear-btn">Savatchani tozalash</button>
+            </div>
+        </section>
+        
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -134,6 +134,58 @@
     </div>
 
     <script>
+        const display=document.getElementById("display");
+        const histortList= document.getElementById("historyList")
+        let calcHistory=JSON.parse(localStorage.getItem("myCalcHistory")) || [];
+        let isResultDisplayed=false;
+        function press(num){
+            if (display.value ==="0" || isResultDisplayed){
+                display.value=num;
+                isResultDisplayed=false;
+                    }
+            else{
+                display.value+=num;
+            }
+        }
+        function clearDisplay(){
+            display.value="0";
+        }
+
+        function calculate(){
+            try{
+                const expression=display.value;
+                const result=eval(expression);
+                display.value=result;
+                isResultDisplayed=true;
+                                    //23+23=46
+                const historyItem=`${expression}=${result}`;
+                calcHistory.unshift(historyItem);
+                localStorage.setItem("myCalcHistory",JSON.stringify(calcHistory))
+                renderHistory();
+
+            }
+            catch{
+                display.value="Xatolik!";
+                isResultDisplayed=true;
+            }
+        }
+        function renderHistory(){
+            histortList.innerHTML="";
+            calcHistory.forEach(
+                item=>{
+                    const li = document.createElement("li");
+                    li.textContent=item;
+                    histortList.appendChild(li)
+                }
+            )
+        }
+        renderHistory();
+        function clearHistory(){
+            localStorage.removeItem("myCalcHistory");
+            calcHistory=[];
+            renderHistory();
+        }
+
 
     </script>
 </body>
